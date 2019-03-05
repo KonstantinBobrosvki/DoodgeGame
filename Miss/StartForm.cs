@@ -53,7 +53,7 @@ namespace Miss
 			else
 			{
                 try
-                {
+                {   
                     if(ColorChoose.SelectedItem!=null)
                     Controller.Web.MainPlayer=new Player(Color.FromName(ColorChoose.SelectedItem.ToString() ), name.Text);
                     else

@@ -31,7 +31,7 @@ namespace Miss
 	    
 	    int hightscore;
 	    int currentscore;
-		int speed=30;
+		int speed;
 		Key[] controls;
 		/* елемент controls 
          * 0вверх
@@ -83,7 +83,7 @@ namespace Miss
             controls = new Key[] { Key.W, Key.D, Key.S, Key.A, Key.LeftShift };
             this.name = name;
             alive = false;
-
+            speed = 30;
             Random rnd = new Random(Guid.NewGuid().ToByteArray().Sum(x => x));
             Point p;
             try
@@ -116,7 +116,7 @@ namespace Miss
 		foreach (var element in all) {
                
 			element.currentscore=0;
-			element.Alive=true;
+			element.alive=true;
             Random rnd = new Random(Guid.NewGuid().ToByteArray().Sum(x => x));
             Point p = new Point(rnd.Next(0, Balls.BoundsForReflect().Item1 - 70), rnd.Next(0, Balls.BoundsForReflect().Item2 - 70));
             element.area = new Rectangle(p, new Size(50, 50));
@@ -132,9 +132,12 @@ namespace Miss
             }
             private set
             {
-                if (!value && Dying!=null)
-                    Dying();
-                
+                if (Dying!=null)
+                    if(value==false)
+                        Dying();
+
+               
+
 
                 alive = value;
             }
@@ -151,6 +154,7 @@ namespace Miss
 		    		if (area.Y==0) {
 		    			break;
 		    		}
+                  
 				area.Y--;
 		    		
 					}
@@ -176,7 +180,7 @@ namespace Miss
 				if (Keyboard.IsKeyDown(controls[3])) {
 					
 			for (int i = 0; i < speed; i++) {
-				if (area.X==0) {
+			        if (area.X==0) {
 		    			break;
 		    		}
 		    		area.X--;
@@ -206,9 +210,10 @@ namespace Miss
                 return;
             g.DrawRectangle(pen,this.area);
 		g.DrawString(name,font,brush,this.area.X,this.area.Y+16.0f);
-            CheckMove();
+            
     }
 
+    // Is there any player who wasnt hitted
 	public static bool Live()
 	{int i=0;
 		foreach (var element in all) {
@@ -232,6 +237,16 @@ namespace Miss
         {
             return all.Count;
         }
+
+    public static void MoveChecker()
+    {
+            foreach (var item in all)
+            {
+                if (!item.Alive)
+                    continue;
+                item.CheckMove();
+            }
+    }
 
     }
 

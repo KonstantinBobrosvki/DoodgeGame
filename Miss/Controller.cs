@@ -38,7 +38,7 @@ namespace Miss
         {
             Frame = new Timer();
             Frame.Interval = 1000 / 24;
-            Frame.Tick += FrameTick;
+           
             BallAdd = new Timer();
             BallAdd.Interval = 4000;
            
@@ -65,7 +65,9 @@ namespace Miss
         //Close all windows of Aplication
         private static void CloseAplication(object sender,EventArgs e)
         {
+            
             Program.z.Close();
+
         }
 
         //Drawing on Form
@@ -73,6 +75,7 @@ namespace Miss
         {
             var g = e.Graphics;
            
+
             foreach (var item in ToDraw)
             {
                 item.Draw(g);
@@ -80,7 +83,8 @@ namespace Miss
         }
 
         //Call drawing on form
-		private static void FrameTick(object Sender,EventArgs e)
+        //It must be called on every tick without event
+		private static void FrameTick()
 		{
              screen.Invalidate();
 		}

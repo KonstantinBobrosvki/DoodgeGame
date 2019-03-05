@@ -17,7 +17,7 @@ namespace Miss
         {
             //8006 is hoster recivier 8005 is for client
 
-           private static bool GameIsStartedonBoth;
+            private static bool GameIsStartedonBoth;
 
             static Player p;
             
@@ -25,8 +25,22 @@ namespace Miss
 
             static bool anotherdied; //Is dead another player
 
+            static IPEndPoint endpoint;
 
+            public static IPEndPoint IPEnd
+            {
+                get
+                {
+                    return endpoint;
+                }
+                set
+                {
+                    endpoint = value;
+                }
 
+            }
+
+            //TODO : In all methods remove local IPendpoin by changing by IPEnd
 
             //Initialization of some things
             static Web()
@@ -38,33 +52,36 @@ namespace Miss
             public async static void Start()
             {
                 //Opening new form for playground
-                SetScreen(new MainForm());
+                MainForm form = new MainForm();
+                SetScreen(form);
 
                 //Showing playground
                 screen.Show();
 
-               
-
-               
-
-                System.Windows.Forms.MessageBox.Show("sd");
-                
                 Frame.Start();
                 Frame.Tick += ScreenUpdate;
 
                 if (Hoster)
                 {
                     BallAdd.Start();
+                    BallAdd.Tick += NewBall;
                 }
                 else
                 {
                     SendToStart();
                     Controller.Web.NewRound();
                     GameIsStartedonBoth = true;
+                    AnotherDied = false;
+                   
                 }
 
                 //Start listening for signals
                 await Task.Run(() => Reciever());
+
+                //For closing of program
+                screen.FormClosed += Exit;
+
+
             }//Like main
 
             public static bool AnotherDied
@@ -80,7 +97,6 @@ namespace Miss
                     anotherdied = value;
                 }
             }//anotherdied public version
-
 
             //Recieve info from another computer
             private static void Reciever()
@@ -124,21 +140,20 @@ namespace Miss
 
                         if (builder.ToString().Contains(";"))
                         {
-
-
                             var z = new FakePlayer(builder.ToString());
 
                             if (FakePlayer.NewFake(z))
                             {
                                 ToDraw.Add(z);
-
                             }
+
                         }
                         else if (builder.ToString() == "Start")
                         {
                             if (Hoster)
                             { 
-                            GameIsStartedonBoth = true;
+                                GameIsStartedonBoth = true;
+                                BallAdd.Start();
                                 NewRound();
                             }
 
@@ -152,6 +167,10 @@ namespace Miss
                         {
 
                             AnotherDied = true;
+                        }
+                        else if (builder.ToString().Equals("STOP"))
+                        {
+                            GameIsStartedonBoth = false;
                         }
 
 
@@ -173,11 +192,14 @@ namespace Miss
 
             }
 
+            #region Sender methods for another computer
+
             //Sending signal to start
             private static void SendToStart()
             {
                 int port = 8006;
                 IPEndPoint ipPoint = new IPEndPoint(IPAddress.Parse("127.0.0.1"), port);
+                
                 Socket sender = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
                 try
                 {
@@ -190,7 +212,7 @@ namespace Miss
                 }
                 catch (Exception e)
                 {
-                    System.Windows.Forms.MessageBox.Show(e.StackTrace);
+                    System.Windows.Forms.MessageBox.Show("Connecting have error");
                 }
                 GameIsStartedonBoth = true;
             }
@@ -199,9 +221,8 @@ namespace Miss
             private static void SendBall(Balls b)
             {
                 if (!GameIsStartedonBoth)
-                {
                     return;
-                }
+                
                 int port = 8005;
                 IPEndPoint ipPoint = new IPEndPoint(IPAddress.Parse("127.0.0.1"), port);
                 Socket sender = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
@@ -230,6 +251,7 @@ namespace Miss
                 int port = 8006;
                 if (Hoster)
                     port = 8005;
+
                 IPEndPoint ipPoint = new IPEndPoint(IPAddress.Parse("127.0.0.1"), port);
                 Socket sender = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
                 try
@@ -246,31 +268,6 @@ namespace Miss
 
                     System.Windows.Forms.MessageBox.Show(e.Message);
                 }
-            }
-
-            //Player of this computer
-            public static Player MainPlayer
-            {
-                get
-                {
-                    return p;
-                }
-                set
-                {
-
-                    p = value;
-                    ToDraw.Add(p);
-                    p.Dying += MainDying;
-
-                }
-            }
-
-            //Event of MainPlayer Dying
-            private static void MainDying()
-            {
-                //Send to other comp that i died
-                if(GameIsStartedonBoth)
-                MeDied();
             }
 
             //Sending signal of dying of MainPlayer
@@ -297,12 +294,68 @@ namespace Miss
                 }
             }
 
+            //Send signal that i left
+            static void Exit(object caller,System.Windows.Forms.FormClosedEventArgs e)
+            {
+                int port = 8006;
+                if (Hoster)
+                    port = 8005;
+                IPEndPoint ipPoint = new IPEndPoint(IPAddress.Parse("127.0.0.1"), port);
+                Socket sender = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
+                try
+                {
+                    sender.Connect(ipPoint);
+
+                    var forsend = Encoding.Unicode.GetBytes("STOP");
+                    sender.Send(forsend);
+                    sender.Shutdown(SocketShutdown.Both);
+                    sender.Close();
+                }
+                catch (Exception ex)
+                {
+
+                    System.Windows.Forms.MessageBox.Show(ex.Message);
+                }
+            }
+
+            #endregion
+
+            //Player of this computer
+            public static Player MainPlayer
+            {
+                get
+                {
+                    return p;
+                }
+                set
+                {
+
+                    p = value;
+                    ToDraw.Add(p);
+                    p.Dying += MainDying;
+
+                }
+            }
+
+            //Event of MainPlayer Dying
+            private static void MainDying()
+            {
+                //Send to other comp that i died
+                if(GameIsStartedonBoth)
+                MeDied();
+            }
+
             //Sending information about your MainPlayer to other computer
             static void ScreenUpdate(object sender,EventArgs e)
             {
+                //Drawing elemets
+                FrameTick();
+
+                Player.MoveChecker();
 
                 if (!GameIsStartedonBoth)
                     return;
+               
                 Controller.Web.SendPlayer(MainPlayer);
                 if (!Player.Live() && AnotherDied)
                 {
@@ -318,6 +371,7 @@ namespace Miss
                 Balls.Clear();
                 for (int i = 0; i < ToDraw.Count; i++)
                 {
+                    if(ToDraw[i] is Balls)
                     ToDraw.RemoveAt(i--);
                 }
             }
@@ -325,14 +379,16 @@ namespace Miss
             //Create new ball and send it
             static void NewBall(object sender,EventArgs e)
             {
-                if(!GameIsStartedonBoth)
-                {
-                    return;
-                }
 
-                var t = new Balls(screen);
-                ToDraw.Add(t);
-                Web.SendBall(t);
+                if (!GameIsStartedonBoth)
+                    return;
+                    
+                    var t = new Balls(screen);
+                    ToDraw.Add(t);
+                    Web.SendBall(t);
+
+                
+               
 
             }
 
