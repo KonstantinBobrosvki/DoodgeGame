@@ -14,6 +14,8 @@ namespace Miss
         Rectangle area;
         string name;
        static List<FakePlayer> all;
+        
+
         #region Comments
 
         //This is a class only for drawing player on other computer
@@ -22,7 +24,7 @@ namespace Miss
         //Player.ToString()
         //public override string ToString()
         //{
-        //    string forret = area.X.ToString() + ',' + area.Y + ',' + name + ',' + pen.Color.ToArgb();
+        //    string forret = area.X.ToString() + ',' + area.Y + ',' + name + ',' + pen.Color.ToArgb()+';';
         //    return forret;
         //}
         #endregion
@@ -34,11 +36,16 @@ namespace Miss
             pen = new Pen(Color.FromArgb(int.Parse(things[3].TrimEnd(';'))));
 
         }
+        
         static Font font;
         static Brush brush;
         public void SetPosition(Point p)
         {
             area.Location = p;
+        }
+        public static void Clear()
+        {
+            all.Clear();
         }
         
         static FakePlayer()
@@ -49,10 +56,7 @@ namespace Miss
             all = new List<FakePlayer>(2);
 
         }
-        public static void Clear()
-        {
-            all.Clear();
-        }
+       
         //I check is this new or new position
         public static bool NewFake(FakePlayer f)
         {
@@ -72,7 +76,8 @@ namespace Miss
         public void Draw(Graphics g)
         {
 
-           
+            if (Controller.Web.AnotherDied)
+                return;
             g.DrawRectangle(pen, this.area);
             g.DrawString(name, font, brush, this.area.X, this.area.Y + 16.0f);
         }

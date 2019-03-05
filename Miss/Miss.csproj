@@ -62,6 +62,7 @@
   <ItemGroup>
     <Compile Include="Balls.cs" />
     <Compile Include="Controller.cs" />
+    <Compile Include="ControllerLocal.cs" />
     <Compile Include="ControllerWEB.cs" />
     <Compile Include="FakePlayer.cs" />
     <Compile Include="IDrawer.cs" />

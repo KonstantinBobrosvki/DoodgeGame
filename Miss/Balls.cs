@@ -26,6 +26,7 @@ namespace Miss
 		int VectorX;
 		int VectorY;
 	
+        //In every construct we must this add to all
 		public Balls(Point Location,Color c)
 		{
 			
@@ -45,20 +46,46 @@ namespace Miss
 				#endregion
 				all.Add(this);
 		}
-		//Ограничение для отражения от границ
-		public static void SetBounds(int x,int y)
-		{
-			left=x;
-			Bottom=y;
-		}
+        public Balls(Form screen)
+        {
+            Random rnd = new Random(DateTime.Now.Millisecond + DateTime.Now.Minute * DateTime.Now.Millisecond);
+            this.area = new Rectangle(new Point(rnd.Next(0, screen.Width - 80), rnd.Next(0, screen.Height - 80)), new Size(25, 25));
+            color = new SolidBrush(Color.FromArgb(rnd.Next(0, 255), rnd.Next(0, 255), rnd.Next(0, 255)));
+            #region vector
+            int x = 20;
+            while (x == 0)
+                x = rnd.Next(-10, 10);
+            VectorX = x;
+            x = 0;
+            while (x == 0)
+                x = rnd.Next(-10, 10);
+            VectorY = x;
+            #endregion
+            all.Add(this);
+        }
+
+        //In every construct we must this add to all
+        //This construct is for ball from another computer
+        private Balls(Point p, int vectorX, int vectorY, Color c)
+        {
+            this.area.Location = p;
+            this.area.Size = new Size(25, 25);
+            VectorX = vectorX;
+            VectorY = vectorY;
+            this.color = new SolidBrush(c);
+        }
+
+       
 		
-		
+		//Draw
 		public void Draw(Graphics g)
 		{
 			
 			g.FillEllipse(color,area);
 			this.Move();
 		}
+
+        //Move ball position by vectors
 		private void Move()
 		{
 			#region X
@@ -113,12 +140,15 @@ namespace Miss
 			#endregion
 			
 		}
+
         public override string ToString()
         {
             string forret = "";
             forret = area.X.ToString() + ',' + area.Y + ',' + VectorX + ',' + VectorY+','+color.Color.ToArgb();
             return forret;
         }
+
+        //This is for recieved ball form another computer
         public static Balls FromCode(string code)
         {
             string[] codes = code.Split(',');
@@ -127,16 +157,8 @@ namespace Miss
             all.Add(z);
             return z;
         }
-        private Balls(Point p,int vectorX,int vectorY,Color c)
-        {
-            this.area.Location = p;
-            this.area.Size = new Size(25, 25);
-            VectorX = vectorX;
-            VectorY = vectorY;
-            this.color = new SolidBrush(c);
-        }
 
-
+        //If p.area collusions with one of balls
         public static bool CheckCollusion(Player p)
 		{
 			Rectangle bounds=p.GetBounds();
@@ -148,10 +170,25 @@ namespace Miss
 		}
 			return false;
 		}
+
+        //Clear all for new round
 		public static void Clear()
 		{
 			all.Clear();
 		}
-		
-	}
+
+        //Ограничение для отражения от границ
+        public static void SetBounds(int x, int y)
+        {
+            left = x;
+            Bottom = y;
+        }
+
+        //Ограничение для отражения от границ
+        public static (int, int) BoundsForReflect()
+        {
+            return (left, Bottom);
+        }
+
+    }
 }

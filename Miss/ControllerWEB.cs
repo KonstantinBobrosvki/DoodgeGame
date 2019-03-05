@@ -12,130 +12,332 @@ namespace Miss
 {
     public static partial class Controller
     {
-      static List<FakePlayer> fakes = new List<FakePlayer>();
-        public static async void InternetStart()
+
+        public static class Web
         {
-          
-           
-            await Task.Run(() => Reciever());
-        }
-        private static void Reciever()
-        {
-            // порт сервера
+            //8006 is hoster recivier 8005 is for client
 
-            int port = 8005;
-            if (Hoster)
-                port = 8006;
-             string address = "127.0.0.1";
+           private static bool GameIsStartedonBoth;
 
-            IPEndPoint ipPoint = new IPEndPoint(IPAddress.Parse(address), port);
+            static Player p;
+            
+            public static bool Hoster;
 
-            // создаем сокет
-            Socket listenSocket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
-            try
+            static bool anotherdied; //Is dead another player
+
+
+
+
+            //Initialization of some things
+            static Web()
             {
-                // связываем сокет с локальной точкой, по которой будем принимать данные
-                listenSocket.Bind(ipPoint);
+                GameIsStartedonBoth = false;
+            }
 
-                // начинаем прослушивание
-                listenSocket.Listen(10);
+            //Initialization of all things 
+            public async static void Start()
+            {
+                //Opening new form for playground
+                SetScreen(new MainForm());
+
+                //Showing playground
+                screen.Show();
 
                
+
+               
+
+                System.Windows.Forms.MessageBox.Show("sd");
                 
-                while (true)
+                Frame.Start();
+                Frame.Tick += ScreenUpdate;
+
+                if (Hoster)
                 {
-                    Socket handler = listenSocket.Accept();
-                    // получаем сообщение
-                    StringBuilder builder = new StringBuilder();
-                    int bytes = 0; // количество полученных байтов
-                    byte[] data = new byte[256]; // буфер для получаемых данных
+                    BallAdd.Start();
+                }
+                else
+                {
+                    SendToStart();
+                    Controller.Web.NewRound();
+                    GameIsStartedonBoth = true;
+                }
 
-                    do
-                    {
-                        bytes = handler.Receive(data);
-                        builder.Append(Encoding.Unicode.GetString(data, 0, bytes));
-                    }
-                    while (handler.Available > 0);
+                //Start listening for signals
+                await Task.Run(() => Reciever());
+            }//Like main
 
-                   if(builder.ToString().Contains(";"))
+            public static bool AnotherDied
+            {
+
+                get
+                {
+                    return anotherdied;
+
+                }
+                private set
+                {
+                    anotherdied = value;
+                }
+            }//anotherdied public version
+
+
+            //Recieve info from another computer
+            private static void Reciever()
+            {
+
+                //hoster port is 8006 client 8005
+
+                int port = 8005;
+                if (Hoster)
+                    port = 8006;
+
+                string address = "127.0.0.1";
+
+                IPEndPoint ipPoint = new IPEndPoint(IPAddress.Parse(address), port);
+
+                // создаем сокет
+                Socket listenSocket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
+                try
+                {
+
+                    // связываем сокет с локальной точкой, по которой будем принимать данные
+                    listenSocket.Bind(ipPoint);
+
+                    // начинаем прослушивание
+                    listenSocket.Listen(10);
+
+                    while (true)
                     {
-                       
-                       var z=new FakePlayer(builder.ToString());
-                        if(FakePlayer.NewFake(z))
+                        Socket handler = listenSocket.Accept();
+                        // получаем сообщение
+                        StringBuilder builder = new StringBuilder();
+                        int bytes = 0; // количество полученных байтов
+                        byte[] data = new byte[256]; // буфер для получаемых данных
+
+                        do
                         {
-                            ToDraw.Add(z);
+                            bytes = handler.Receive(data);
+                            builder.Append(Encoding.Unicode.GetString(data, 0, bytes));
                         }
-                    }
-                   else
-                    {
-                        if(!Hoster)
-                    ToDraw.Add(Balls.FromCode(builder.ToString()));
+                        while (handler.Available > 0);
 
-                    }
+                        if (builder.ToString().Contains(";"))
+                        {
 
-                    // отправляем ответ
-                   
-               
-                   
-                    // закрываем сокет
-                    handler.Shutdown(SocketShutdown.Both);
-                    handler.Close();
+
+                            var z = new FakePlayer(builder.ToString());
+
+                            if (FakePlayer.NewFake(z))
+                            {
+                                ToDraw.Add(z);
+
+                            }
+                        }
+                        else if (builder.ToString() == "Start")
+                        {
+                            if (Hoster)
+                            { 
+                            GameIsStartedonBoth = true;
+                                NewRound();
+                            }
+
+                        }
+                        else if (builder.ToString().Contains(","))
+                        {
+                            ToDraw.Add(Balls.FromCode(builder.ToString()));
+
+                        }
+                        else if (builder.ToString().Contains("MeDied"))
+                        {
+
+                            AnotherDied = true;
+                        }
+
+
+
+
+
+                        // закрываем сокет
+                        handler.Shutdown(SocketShutdown.Both);
+                        handler.Close();
+                    }
+                }
+                catch (Exception ex)
+                {
+                    System.Windows.Forms.MessageBox.Show(ex.Message);
+                    System.Windows.Forms.MessageBox.Show("Reciever Error");
+
+
+                }
+
+            }
+
+            //Sending signal to start
+            private static void SendToStart()
+            {
+                int port = 8006;
+                IPEndPoint ipPoint = new IPEndPoint(IPAddress.Parse("127.0.0.1"), port);
+                Socket sender = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
+                try
+                {
+                    sender.Connect(ipPoint);
+
+                    var forsend = Encoding.Unicode.GetBytes("Start");
+                    sender.Send(forsend);
+                    sender.Shutdown(SocketShutdown.Both);
+                    sender.Close();
+                }
+                catch (Exception e)
+                {
+                    System.Windows.Forms.MessageBox.Show(e.StackTrace);
+                }
+                GameIsStartedonBoth = true;
+            }
+
+            //Sending ball
+            private static void SendBall(Balls b)
+            {
+                if (!GameIsStartedonBoth)
+                {
+                    return;
+                }
+                int port = 8005;
+                IPEndPoint ipPoint = new IPEndPoint(IPAddress.Parse("127.0.0.1"), port);
+                Socket sender = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
+                try
+                {
+                    sender.Connect(ipPoint);
+
+                    var forsend = Encoding.Unicode.GetBytes(b.ToString());
+                    sender.Send(forsend);
+                    sender.Shutdown(SocketShutdown.Both);
+                    sender.Close();
+                }
+                catch (Exception e)
+                {
+                    System.Windows.Forms.MessageBox.Show(e.StackTrace);
                 }
             }
-            catch (Exception ex)
+
+            //Sending FakePlayer to another computer
+            private static void SendPlayer(Player p)
             {
-                System.Windows.Forms.MessageBox.Show(ex.Message);
-                System.Windows.Forms.MessageBox.Show("Reciever Error");
-                return;
+                if (!GameIsStartedonBoth)
+                    return;
+                if (!p.Alive)
+                    return;
+                int port = 8006;
+                if (Hoster)
+                    port = 8005;
+                IPEndPoint ipPoint = new IPEndPoint(IPAddress.Parse("127.0.0.1"), port);
+                Socket sender = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
+                try
+                {
+                    sender.Connect(ipPoint);
+
+                    var forsend = Encoding.Unicode.GetBytes(p.ToString());
+                    sender.Send(forsend);
+                    sender.Shutdown(SocketShutdown.Both);
+                    sender.Close();
+                }
+                catch (Exception e)
+                {
+
+                    System.Windows.Forms.MessageBox.Show(e.Message);
+                }
+            }
+
+            //Player of this computer
+            public static Player MainPlayer
+            {
+                get
+                {
+                    return p;
+                }
+                set
+                {
+
+                    p = value;
+                    ToDraw.Add(p);
+                    p.Dying += MainDying;
+
+                }
+            }
+
+            //Event of MainPlayer Dying
+            private static void MainDying()
+            {
+                //Send to other comp that i died
+                if(GameIsStartedonBoth)
+                MeDied();
+            }
+
+            //Sending signal of dying of MainPlayer
+            private static void MeDied()
+            {
+                int port = 8006;
+                if (Hoster)
+                    port = 8005;
+                IPEndPoint ipPoint = new IPEndPoint(IPAddress.Parse("127.0.0.1"), port);
+                Socket sender = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
+                try
+                {
+                    sender.Connect(ipPoint);
+
+                    var forsend = Encoding.Unicode.GetBytes("MeDied");
+                    sender.Send(forsend);
+                    sender.Shutdown(SocketShutdown.Both);
+                    sender.Close();
+                }
+                catch (Exception e)
+                {
+
+                    System.Windows.Forms.MessageBox.Show(e.Message);
+                }
+            }
+
+            //Sending information about your MainPlayer to other computer
+            static void ScreenUpdate(object sender,EventArgs e)
+            {
+
+                if (!GameIsStartedonBoth)
+                    return;
+                Controller.Web.SendPlayer(MainPlayer);
+                if (!Player.Live() && AnotherDied)
+                {
+                    Web.NewRound();
+                }
+            }
+
+            //Starting new round
+            static void NewRound()
+            {
+                Player.NewRound();
+                AnotherDied = false;
+                Balls.Clear();
+                for (int i = 0; i < ToDraw.Count; i++)
+                {
+                    ToDraw.RemoveAt(i--);
+                }
+            }
+
+            //Create new ball and send it
+            static void NewBall(object sender,EventArgs e)
+            {
+                if(!GameIsStartedonBoth)
+                {
+                    return;
+                }
+
+                var t = new Balls(screen);
+                ToDraw.Add(t);
+                Web.SendBall(t);
 
             }
 
         }
-        
-        private static void SendBall(Balls b)
-        {
-           
-            int port = 8005;
-            IPEndPoint ipPoint = new IPEndPoint(IPAddress.Parse("127.0.0.1"), port);
-            Socket listenSocket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
-            try
-            {
-                listenSocket.Connect(ipPoint);
-              
-                var forsend = Encoding.Unicode.GetBytes(b.ToString());
-                listenSocket.Send(forsend);
-               listenSocket.Shutdown(SocketShutdown.Both);
-                listenSocket.Close();
-            }
-            catch(Exception e)
-            {
-                System.Windows.Forms.MessageBox.Show(e.StackTrace);
-            }
-        }
-        private static void SendPlayer(Player p)
-        {
-            Thread.Sleep(10000);
-            int port = 8006;
-            if (Hoster)
-                port = 8005;
-            IPEndPoint ipPoint = new IPEndPoint(IPAddress.Parse("127.0.0.1"), port);
-            Socket listenSocket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
-            try
-            {
-                listenSocket.Connect(ipPoint);
-
-                var forsend = Encoding.Unicode.GetBytes(p.ToString());
-                listenSocket.Send(forsend);
-                listenSocket.Shutdown(SocketShutdown.Both);
-                listenSocket.Close();
-            }
-            catch (Exception e)
-            {
-
-                System.Windows.Forms.MessageBox.Show(e.Message);
-            }
-        }
-
+      
     }
 
 }

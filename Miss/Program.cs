@@ -16,15 +16,21 @@ namespace Miss
 	/// </summary>
 	internal sealed class Program
 	{
-		/// <summary>
-		/// Program entry point.
-		/// </summary>
-		[STAThread]
+        /// <summary>
+        /// Program entry point.
+        /// </summary>
+        ///  
+         public static StartForm z;
+        [STAThread]
+     
 		private static void Main(string[] args)
 		{
-			Application.EnableVisualStyles();
+            
+
+            Application.EnableVisualStyles();
 			Application.SetCompatibleTextRenderingDefault(false);
-			Application.Run(new StartForm());
+            z = new StartForm();
+            Application.Run(z);
 		}
 		
 	}

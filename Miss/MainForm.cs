@@ -26,10 +26,11 @@ namespace Miss
 			InitializeComponent();
 
 
-            this.WindowState = FormWindowState.Normal;
-		this.DoubleBuffered=true;
+         this.WindowState = FormWindowState.Maximized;
+
+         this.DoubleBuffered=true;
 		
-		this.FormBorderStyle=FormBorderStyle.FixedDialog;
+		 this.FormBorderStyle=FormBorderStyle.FixedDialog;
 	
 		}
 	

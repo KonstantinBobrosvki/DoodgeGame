@@ -19,13 +19,21 @@ namespace Miss
     /// </summary>
     public  static partial class Controller
     {
-        static Player p;
+       
+        //on this tick we draw and update Screen
         static Timer Frame;
+        
+        //On this tick we add new ball
         static Timer BallAdd;
+
+        //Form where we draw
         static Form screen;
+
         static Random rnd;
-      public  static bool Hoster;
+      
+        //Elemets what we will draw
         static List<IDrawer> ToDraw;
+
         static Controller()
         {
             Frame = new Timer();
@@ -33,97 +41,50 @@ namespace Miss
             Frame.Tick += FrameTick;
             BallAdd = new Timer();
             BallAdd.Interval = 4000;
-            BallAdd.Tick += NewBall;
+           
             rnd = new Random();
             ToDraw = new List<IDrawer>();
-            //Balls.SetBounds(Screen.PrimaryScreen.Bounds.Width, Screen.PrimaryScreen.Bounds.Height);
+          
+        }
 
-        }
-        public static Player MainPlayer
-        {
-            get
-            {
-                return p;
-            }
-            set
-            {
-               
-                p = value;
-                ToDraw.Add(p);
-            }
-        }
-        public static void Start()
-        {
-            MainForm fom = new MainForm();
-            SetScreen(fom);
-            Balls.SetBounds(fom.Width, fom.Height);
-            screen.Paint += Draw;
-            Player.NewRound();
-            screen.Show();
-            Frame.Start();
-            if (Hoster) {
-                BallAdd.Start();
-            }
-           
-            Balls.Clear();
-
-        }
-       
-        public static void NewRound()
-		{
-            
-            for (int i = 0; i < ToDraw.Count; i++)
-            {
-                if(ToDraw[i]is Balls ||ToDraw[i] is FakePlayer)
-                {
-                    ToDraw.RemoveAt(i--);
-                }
-            }
-        Player.NewRound();
-            Balls.Clear();
-            
-            
-        }
-		
+        //set form where we draw
 		public static void SetScreen(Form f)
 		{
 			screen=f;
-		}
+            screen.FormClosed += CloseAplication;
+            screen.Paint += Draw;
+
+            // this is not working I dont know why
+            // Balls.SetBounds(screen.Width, screen.Height);
+
+            //this is working perfect
+            Balls.SetBounds(Screen.PrimaryScreen.Bounds.Width, Screen.PrimaryScreen.Bounds.Height);
+
+        }
+
+        //Close all windows of Aplication
+        private static void CloseAplication(object sender,EventArgs e)
+        {
+            Program.z.Close();
+        }
+
+        //Drawing on Form
         private static void Draw(object Sender, PaintEventArgs e)
         {
             var g = e.Graphics;
            
-
-
-
             foreach (var item in ToDraw)
             {
                 item.Draw(g);
             }
         }
+
+        //Call drawing on form
 		private static void FrameTick(object Sender,EventArgs e)
 		{
-            try
-            {
-                Controller.SendPlayer(MainPlayer);
-                screen.Invalidate();
-                if (!Player.Live())
-                {
-                    NewRound();
-                }
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show(ex.StackTrace);
-     
-            }
+             screen.Invalidate();
 		}
-		private static void NewBall(object sender,EventArgs e)
-		{
-			var t= new Balls( new Point(rnd.Next(0,screen.Width-80),rnd.Next(0,screen.Height-80)),Color.FromArgb(rnd.Next(0,255),rnd.Next(0,255),rnd.Next(0,255)));
-            ToDraw.Add(t);
-          //  SendBall(t);
-		}
+		
 	   
 		
 	}

@@ -8,8 +8,10 @@ namespace Miss
 {
     public partial class StartForm : Form
     {
-      //For playrs construction
+        //For playrs construction
         private Dictionary<int, (TextBox, ComboBox)> RegisterInfo;
+
+        //Main of this Form
         void LocalClick()
         {
             
@@ -27,10 +29,14 @@ namespace Miss
             }
 
         }
+
+        //When we change players count we redraw fields
         void PlayerCountChanged(object sender, EventArgs e)
         {
             DrawPlayersAccaunts(int.Parse((sender as NumericUpDown).Value.ToString()));
         }
+
+        //Create fields for players constructor
         void DrawPlayersAccaunts(int HowMuch)
         {
 
@@ -73,48 +79,27 @@ namespace Miss
             Controls.Add(StartGame);
 
         }
+
+        //Start game
         void StartLocalGame(object sender, EventArgs e)
         {
-            int i = 0;
-            Controller.Hoster = true;
             
-            foreach (var item in RegisterInfo)
+            
+            try
             {
-                try
-                {
-                   if(i==0)
-                    {
-                        new Player(Color.FromName(item.Value.Item2.SelectedItem.ToString()), item.Value.Item1.Text);
-                        
+                Controller.Local.Start();
+                Controller.Local.ForLocalGame(RegisterInfo);
 
-                    }
-                    if (i == 1)
-                    {
 
-                        new Player(Color.FromName(item.Value.Item2.SelectedItem.ToString()), item.Value.Item1.Text, new Key[] { Key.NumPad8, Key.NumPad6, Key.NumPad5, Key.NumPad4, Key.Add });
-
-                    }
-                    if (i == 2)
-                    {
-                        new Player(Color.FromName(item.Value.Item2.SelectedItem.ToString()), item.Value.Item1.Text, new Key[] { Key.Up, Key.Right, Key.Down, Key.Left, Key.Enter });
-                        
-                    }
-                    if (i == 3)
-                    {
-                        new Player(Color.FromName(item.Value.Item2.SelectedItem.ToString()), item.Value.Item1.Text, new Key[] { Key.Y, Key.J, Key.H, Key.G, Key.Space });
-
-                    }
-
-                }
-                catch(NullReferenceException)
-                {
-                    MessageBox.Show("Everyone must choose his color");
-                    Player.Clear();
-                    return;
-                }
-                ++i;
             }
-            Controller.Start();
+            catch (NullReferenceException)
+            {
+                MessageBox.Show("Everyone must choose his color");
+                Player.Clear();
+                return;
+            }
+           
+           
             this.Hide();
         }
 

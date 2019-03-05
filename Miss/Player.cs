@@ -17,16 +17,17 @@ namespace Miss
 	/// <summary>
 	/// Description of Player.
 	/// </summary>
-	public class Player : IDrawer
+   public class Player : IDrawer
 
-	{
-        static List<Player> all;
+   {
+       
 		
-        //Area size is 50,50 and it is in New round()
+        
 		Rectangle area;
 		readonly string name;
 	    readonly Pen pen;
-	    bool alive;
+        bool alive;
+        public event Action Dying;
 	    
 	    int hightscore;
 	    int currentscore;
@@ -41,10 +42,10 @@ namespace Miss
 		*/
 		
 			static Font font;
-	static	Brush brush;
-	
-	
-	static Player()
+	        static Brush brush;
+            static List<Player> all;
+
+    static Player()
 	{
 		all=new List<Player>(4);
 		brush=new SolidBrush(Color.Black);
@@ -52,77 +53,97 @@ namespace Miss
 		
 		 
 	}
-    public static int CountOfPlayres()
-        {
-            return all.Count;
-        }
 
-	public Player(Key[]control,string name)
-	{
-		if (control.Length!=5) {
-			throw new Exception("Controls must be 5");
-		}
-		Random rnd=new Random(Guid.NewGuid().ToByteArray().Sum(x=> x));
-		
-		controls=control;
-		pen=new Pen(Color.FromArgb(rnd.Next(0,255),rnd.Next(0,255),rnd.Next(0,255)));
-            alive = false;
-            this.name=name;
-
-		all.Add(this);
-	}
-        public static void Clear()
+	    
+    public static void Clear()
         {
             all.Clear();
         }
-	public Player(Color col,string name, Key[] control)
-	{
+
+    public Player(Color col,string name, Key[] control)
+	    { 
 		if (control.Length!=5) {
 			throw new Exception("Controls must be 5");
 		}
 		pen=new Pen(col);
 		controls=control;
 		this.name=name;
-            alive = false;
+        alive = false;
+        Random rnd = new Random(Guid.NewGuid().ToByteArray().Sum(x => x));
+        Point p = new Point(rnd.Next(0, Balls.BoundsForReflect().Item1 - 70), rnd.Next(0, Balls.BoundsForReflect().Item2 - 70));
+        area = new Rectangle(p, new Size(50, 50));
             all.Add(this);
 		
-	}
+	    }
 
-
-        public Player(Color col, string name)
+    public Player(Color col, string name)
         {
             
             pen = new Pen(col);
             controls = new Key[] { Key.W, Key.D, Key.S, Key.A, Key.LeftShift };
             this.name = name;
             alive = false;
+
+            Random rnd = new Random(Guid.NewGuid().ToByteArray().Sum(x => x));
+            Point p;
+            try
+            {
+
+                p = new Point(rnd.Next(0, Balls.BoundsForReflect().Item1 - 70), rnd.Next(0, Balls.BoundsForReflect().Item2 - 70));
+            }
+            catch(ArgumentOutOfRangeException)
+            {
+                p= new Point(rnd.Next(0, Screen.PrimaryScreen.Bounds.Width - 70), rnd.Next(0, Screen.PrimaryScreen.Bounds.Height - 70));
+            }
+            catch (Exception)
+            {
+                p = new Point(rnd.Next(0, Screen.PrimaryScreen.Bounds.Width - 70), rnd.Next(0, Screen.PrimaryScreen.Bounds.Height - 70));
+
+            }
+            area = new Rectangle(p, new Size(50, 50));
             all.Add(this);
            
 
         }
 
 
-        public Rectangle GetBounds()	{
+    public Rectangle GetBounds(){
 		return this.area;
 	}
-	
 	
 	public static void NewRound()
 	{
 		foreach (var element in all) {
                
 			element.currentscore=0;
-			element.alive=true;
+			element.Alive=true;
             Random rnd = new Random(Guid.NewGuid().ToByteArray().Sum(x => x));
-            Point p = new Point(rnd.Next(0, Screen.PrimaryScreen.Bounds.Width - 70), rnd.Next(0, Screen.PrimaryScreen.Bounds.Height - 70));
+            Point p = new Point(rnd.Next(0, Balls.BoundsForReflect().Item1 - 70), rnd.Next(0, Balls.BoundsForReflect().Item2 - 70));
             element.area = new Rectangle(p, new Size(50, 50));
-            }
+        
+}
 	}
-	
-	private void CheckMove()
+
+    public bool Alive
+        {
+            get
+            {
+                return alive;
+            }
+            private set
+            {
+                if (!value && Dying!=null)
+                    Dying();
+                
+
+                alive = value;
+            }
+        }
+
+    private void CheckMove()
 	{
 
-            if (!alive)
+            if (!Alive)
                 return;
 
 		if (Keyboard.IsKeyDown(controls[0])) {
@@ -169,9 +190,7 @@ namespace Miss
 		if(	Balls.CheckCollusion(this))
 		{
 
-                this.alive = false;
-			if(all.Count==0)
-				Controller.Start();
+                this.Alive = false;
 			
 		}
 			
@@ -180,20 +199,20 @@ namespace Miss
 		}
 	}
 	
-	
 	public void Draw(Graphics g)
 	{
 
-            if (!alive)
+            if (!Alive)
                 return;
             g.DrawRectangle(pen,this.area);
 		g.DrawString(name,font,brush,this.area.X,this.area.Y+16.0f);
             CheckMove();
     }
+
 	public static bool Live()
 	{int i=0;
 		foreach (var element in all) {
-			if(element.alive)
+			if(element.Alive)
 				i++;
 		}
 		if (i==0) {
@@ -203,22 +222,17 @@ namespace Miss
 		return true;
 	}
 
-        public override string ToString()
+    public override string ToString()
         {
-            string forret = area.X.ToString() + ',' + area.Y + ',' + name+',' + pen.Color.ToArgb()+';';
+            string forret = area.X.ToString() + ',' + area.Y + ',' + name+',' + pen.Color.ToArgb() + ';';
             return forret;
         }
         
-        public static string[] GetCode()
+    public static int CountOfPlayres()
         {
-            string[] forret = new string[all.Count];
-            int i = 0;
-            foreach (var item in all)
-            {
-                forret[i++] = item.ToString();
-            }
-            return forret;
+            return all.Count;
         }
+
     }
-    
+
 }

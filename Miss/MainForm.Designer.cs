@@ -14,7 +14,7 @@ namespace Miss
 		/// Designer variable used to keep track of non-visual components.
 		/// </summary>
 		private System.ComponentModel.IContainer components = null;
-		private System.Windows.Forms.Timer timer1;
+		
 		
 		/// <summary>
 		/// Disposes resources used by the form.

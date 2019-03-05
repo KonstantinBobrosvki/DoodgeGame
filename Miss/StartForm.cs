@@ -55,15 +55,14 @@ namespace Miss
                 try
                 {
                     if(ColorChoose.SelectedItem!=null)
-                    Controller.MainPlayer=new Player(Color.FromName(ColorChoose.SelectedItem.ToString() ), name.Text);
+                    Controller.Web.MainPlayer=new Player(Color.FromName(ColorChoose.SelectedItem.ToString() ), name.Text);
                     else
                     {
                         MessageBox.Show("Choose Color");
                         return;
                     }
-                    Controller.Hoster = true;
-                    Controller.InternetStart();
-                    Controller.Start();
+                    Controller.Web.Hoster = true;
+                    Controller.Web.Start();
                 }
                 catch(Exception ex)
                 {
@@ -74,9 +73,17 @@ namespace Miss
 		}
 		void ConnectClick(object sender, EventArgs e)
 		{
-            Controller.MainPlayer = new Player(Color.FromName(ColorChoose.SelectedItem.ToString()?? "Gold"), name.Text);
-            Controller.InternetStart();
-            Controller.Start();
+            if (ColorChoose.SelectedItem != null)
+                Controller.Web.MainPlayer = new Player(Color.FromName(ColorChoose.SelectedItem.ToString()), name.Text);
+            else
+            {
+                MessageBox.Show("Choose Color");
+                return;
+            }
+            Controller.Web.Hoster = false;
+            Controller.Web.Start();
+
+            
             this.Hide();
 		}
 		
