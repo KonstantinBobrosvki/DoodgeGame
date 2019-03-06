@@ -21,32 +21,55 @@ namespace Miss
 
             static Player p;
             
-            public static bool Hoster;
+            private static bool hoster;
 
             static bool anotherdied; //Is dead another player
 
-            static IPEndPoint endpoint;
+            //My port reciever
+            static int MyPort;
 
-            public static IPEndPoint IPEnd
-            {
-                get
-                {
-                    return endpoint;
-                }
-                set
-                {
-                    endpoint = value;
-                }
-
-            }
-
-            //TODO : In all methods remove local IPendpoin by changing by IPEnd
+            //Enemy reciever port (I send thing there)
+            static int EnemyPort;
+            
 
             //Initialization of some things
             static Web()
             {
                 GameIsStartedonBoth = false;
             }
+
+            public static bool Hoster
+            {
+                get
+                {
+                    return hoster;
+                }
+                set
+                {
+                    hoster = value;
+                    if (value)
+                    {
+                        MyPort = 8006;
+                        EnemyPort = 8005;
+                    }
+                    else
+                    {
+                        MyPort = 8005;
+                        EnemyPort = 8006;
+                    }
+
+                }
+            }
+
+            public static string MyIPAdress
+            {
+                get
+                {
+                    return   Dns.GetHostByName(Dns.GetHostName()).AddressList[0].ToString();
+                }
+            }
+
+
 
             //Initialization of all things 
             public async static void Start()
@@ -104,13 +127,11 @@ namespace Miss
 
                 //hoster port is 8006 client 8005
 
-                int port = 8005;
-                if (Hoster)
-                    port = 8006;
+               
 
-                string address = "127.0.0.1";
+                
 
-                IPEndPoint ipPoint = new IPEndPoint(IPAddress.Parse(address), port);
+                IPEndPoint ipPoint = new IPEndPoint(IPAddress.Parse(MyIPAdress), MyPort);
 
                 // создаем сокет
                 Socket listenSocket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
