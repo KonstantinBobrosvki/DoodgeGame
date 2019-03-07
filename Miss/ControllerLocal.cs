@@ -28,7 +28,7 @@ namespace Miss
                     {
 
                         ToDraw.Add(new Player(Color.FromName(item.Value.Item2.SelectedItem.ToString()), item.Value.Item1.Text, new Key[] { Key.NumPad8, Key.NumPad6, Key.NumPad5, Key.NumPad4, Key.Add }));
-
+                       
                     }
                     if (i == 2)
                     {
@@ -52,7 +52,7 @@ namespace Miss
             }
 
             
-            public static void Start()
+            public async static void Start()
             {
                 SetScreen(new MainForm());
                 screen.Show();
@@ -60,13 +60,20 @@ namespace Miss
                 BallAdd.Start();
                 Frame.Tick += LocalTick;
                 NewRound();
+
+              
             }
 
             //This is FrameTick and we check is there any alive player
             private static void LocalTick(object sender, EventArgs e)
             {
+                Player.MoveChecker();
+                FrameTick();
+               
                 if (!Player.Live())
+                { 
                     NewRound();
+                }
             }
 
             public static void NewRound()

@@ -25,22 +25,9 @@ namespace Miss
 
             static bool anotherdied; //Is dead another player
 
-            static IPEndPoint endpoint;
+   
 
-            public static IPEndPoint IPEnd
-            {
-                get
-                {
-                    return endpoint;
-                }
-                set
-                {
-                    endpoint = value;
-                }
-
-            }
-
-            //TODO : In all methods remove local IPendpoin by changing by IPEnd
+           
 
             //Initialization of some things
             static Web()

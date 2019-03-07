@@ -68,11 +68,21 @@ namespace Miss
 		pen=new Pen(col);
 		controls=control;
 		this.name=name;
+            speed = 30;
         alive = false;
-        Random rnd = new Random(Guid.NewGuid().ToByteArray().Sum(x => x));
-        Point p = new Point(rnd.Next(0, Balls.BoundsForReflect().Item1 - 70), rnd.Next(0, Balls.BoundsForReflect().Item2 - 70));
-        area = new Rectangle(p, new Size(50, 50));
-            all.Add(this);
+        all.Add(this);
+            Random rnd = new Random(Guid.NewGuid().ToByteArray().Sum(x => x));
+            try
+            {
+                Point p = new Point(rnd.Next(40, Balls.BoundsForReflect().Item1 - 70), rnd.Next(40, Balls.BoundsForReflect().Item2 - 70));
+                area = new Rectangle(p, new Size(50, 50));
+            }
+            catch(ArgumentOutOfRangeException)
+            {
+                Point p = new Point(rnd.Next(40, Screen.PrimaryScreen.Bounds.Width - 70), rnd.Next(40, Screen.PrimaryScreen.Bounds.Height - 70));
+                area = new Rectangle(p, new Size(50, 50));
+            }
+      
 		
 	    }
 
@@ -146,12 +156,12 @@ namespace Miss
     private void CheckMove()
 	{
 
-            if (!Alive)
-                return;
+           
 
 		if (Keyboard.IsKeyDown(controls[0])) {
 					for (int i = 0; i < speed; i++) {
-		    		if (area.Y==0) {
+                   
+                    if (area.Y==0) {
 		    			break;
 		    		}
                   
@@ -162,6 +172,7 @@ namespace Miss
 		if (Keyboard.IsKeyDown(controls[1])) {
 					for (int i = 0; i < speed; i++) {
 		    		if (area.X==Screen.PrimaryScreen.Bounds.Width-75) {
+                        
 		    			break;
 		    		}
 				area.X++;
@@ -240,12 +251,14 @@ namespace Miss
 
     public static void MoveChecker()
     {
-            foreach (var item in all)
-            {
-                if (!item.Alive)
-                    continue;
-                item.CheckMove();
-            }
+            
+                foreach (var item in all)
+                {
+                    if (item.Alive)
+                    item.CheckMove();
+               
+                }
+           
     }
 
     }

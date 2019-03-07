@@ -83,14 +83,11 @@ namespace Miss
         //Start game
         void StartLocalGame(object sender, EventArgs e)
         {
-            
-            
+
+
             try
             {
-                Controller.Local.Start();
                 Controller.Local.ForLocalGame(RegisterInfo);
-
-
             }
             catch (NullReferenceException)
             {
@@ -98,6 +95,9 @@ namespace Miss
                 Player.Clear();
                 return;
             }
+            Controller.Local.Start();
+            
+            
            
            
             this.Hide();
