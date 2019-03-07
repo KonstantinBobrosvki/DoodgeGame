@@ -65,7 +65,9 @@ namespace Miss
             {
                 get
                 {
-                    return   Dns.GetHostByName(Dns.GetHostName()).AddressList[0].ToString();
+                    //Download info from this site
+                    var forret = new WebClient().DownloadString("http://icanhazip.com");
+                    return forret.Remove(forret.Length-1,1);
                 }
             }
 
