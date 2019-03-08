@@ -30,7 +30,9 @@ namespace Miss
 
             //Enemy reciever port (I send thing there)
             static int EnemyPort;
-            
+
+            //private of EnemyIp
+            static string enemyip;
 
             //Initialization of some things
             static Web()
@@ -66,11 +68,38 @@ namespace Miss
                 get
                 {
                     //Download info from this site
+                    //My public ip
+
                     var forret = new WebClient().DownloadString("http://icanhazip.com");
                     return forret.Remove(forret.Length-1,1);
                 }
             }
 
+            public static string EnemyIp
+            {
+                get
+                {
+                    return enemyip;
+                }
+                set
+                {
+                    try
+                    {
+                        IPAddress.Parse(value);
+                    }
+                    catch (FormatException ex)
+                    {
+                        System.Windows.Forms.MessageBox.Show("Въввединия IP не е верен.");
+                        return;
+                    }
+                    catch(ArgumentNullException ex)
+                    {
+                        System.Windows.Forms.MessageBox.Show("Въвведeтe IP ");
+                        return;
+                    }
+                    enemyip = value;
+                }
+            }
 
 
             //Initialization of all things 
@@ -94,9 +123,7 @@ namespace Miss
                 else
                 {
                     SendToStart();
-                    Controller.Web.NewRound();
-                    GameIsStartedonBoth = true;
-                    AnotherDied = false;
+                  
                    
                 }
 
@@ -128,12 +155,12 @@ namespace Miss
             {
 
                 //hoster port is 8006 client 8005
+                TcpListener tcpListener = new TcpListener(IPAddress.Any,MyPort);
 
-               
-
-                
+               //TODO: Improve External IP
 
                 IPEndPoint ipPoint = new IPEndPoint(IPAddress.Parse(MyIPAdress), MyPort);
+
 
                 // создаем сокет
                 Socket listenSocket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
@@ -142,7 +169,13 @@ namespace Miss
 
                     // связываем сокет с локальной точкой, по которой будем принимать данные
                     listenSocket.Bind(ipPoint);
-
+                }
+                catch(SocketException)
+                {
+                    System.Windows.Forms.MessageBox.Show("Грешка при свързване за слушане");
+                }
+                try
+                {
                     // начинаем прослушивание
                     listenSocket.Listen(10);
 
@@ -174,11 +207,17 @@ namespace Miss
                         else if (builder.ToString() == "Start")
                         {
                             if (Hoster)
-                            { 
-                                GameIsStartedonBoth = true;
+                            {
                                 BallAdd.Start();
                                 NewRound();
+                                SendToStart();
                             }
+                            else
+                            {
+                                Controller.Web.NewRound();
+                                AnotherDied = false;
+                            }
+                            GameIsStartedonBoth = true;
 
                         }
                         else if (builder.ToString().Contains(","))
@@ -204,13 +243,14 @@ namespace Miss
                         handler.Shutdown(SocketShutdown.Both);
                         handler.Close();
                     }
+                
                 }
+               
                 catch (Exception ex)
                 {
-                    System.Windows.Forms.MessageBox.Show(ex.Message);
-                    System.Windows.Forms.MessageBox.Show("Reciever Error");
-
-
+                    //System.Windows.Forms.MessageBox.Show("Грешка при приемане");
+                   // System.Windows.Forms.MessageBox.Show(ex.);
+                    return;
                 }
 
             }
@@ -220,8 +260,8 @@ namespace Miss
             //Sending signal to start
             private static void SendToStart()
             {
-                int port = 8006;
-                IPEndPoint ipPoint = new IPEndPoint(IPAddress.Parse("127.0.0.1"), port);
+                
+                IPEndPoint ipPoint = new IPEndPoint(IPAddress.Parse(EnemyIp), EnemyPort);
                 
                 Socket sender = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
                 try
@@ -235,7 +275,7 @@ namespace Miss
                 }
                 catch (Exception e)
                 {
-                    System.Windows.Forms.MessageBox.Show("Connecting have error");
+                    System.Windows.Forms.MessageBox.Show("Грешка при старт");
                 }
                 GameIsStartedonBoth = true;
             }
@@ -246,8 +286,7 @@ namespace Miss
                 if (!GameIsStartedonBoth)
                     return;
                 
-                int port = 8005;
-                IPEndPoint ipPoint = new IPEndPoint(IPAddress.Parse("127.0.0.1"), port);
+                IPEndPoint ipPoint = new IPEndPoint(IPAddress.Parse(EnemyIp), EnemyPort);
                 Socket sender = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
                 try
                 {
@@ -260,7 +299,8 @@ namespace Miss
                 }
                 catch (Exception e)
                 {
-                    System.Windows.Forms.MessageBox.Show(e.StackTrace);
+                    System.Windows.Forms.MessageBox.Show("Грешка при пращане на топката");
+
                 }
             }
 
@@ -271,11 +311,9 @@ namespace Miss
                     return;
                 if (!p.Alive)
                     return;
-                int port = 8006;
-                if (Hoster)
-                    port = 8005;
 
-                IPEndPoint ipPoint = new IPEndPoint(IPAddress.Parse("127.0.0.1"), port);
+
+                IPEndPoint ipPoint = new IPEndPoint(IPAddress.Parse(EnemyIp), EnemyPort);
                 Socket sender = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
                 try
                 {
@@ -289,17 +327,18 @@ namespace Miss
                 catch (Exception e)
                 {
 
-                    System.Windows.Forms.MessageBox.Show(e.Message);
+                    System.Windows.Forms.MessageBox.Show("Грешка при пращане на играч");
+
                 }
             }
 
             //Sending signal of dying of MainPlayer
             private static void MeDied()
             {
-                int port = 8006;
-                if (Hoster)
-                    port = 8005;
-                IPEndPoint ipPoint = new IPEndPoint(IPAddress.Parse("127.0.0.1"), port);
+                if (!GameIsStartedonBoth)
+                    return;
+               
+                IPEndPoint ipPoint = new IPEndPoint(IPAddress.Parse(EnemyIp), EnemyPort);
                 Socket sender = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
                 try
                 {
@@ -313,17 +352,18 @@ namespace Miss
                 catch (Exception e)
                 {
 
-                    System.Windows.Forms.MessageBox.Show(e.Message);
+                    System.Windows.Forms.MessageBox.Show("Грешка при смърт");
+
                 }
             }
 
             //Send signal that i left
             static void Exit(object caller,System.Windows.Forms.FormClosedEventArgs e)
             {
-                int port = 8006;
-                if (Hoster)
-                    port = 8005;
-                IPEndPoint ipPoint = new IPEndPoint(IPAddress.Parse("127.0.0.1"), port);
+                if (!GameIsStartedonBoth)
+                    return;
+
+                IPEndPoint ipPoint = new IPEndPoint(IPAddress.Parse(EnemyIp), EnemyPort);
                 Socket sender = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
                 try
                 {
@@ -337,7 +377,8 @@ namespace Miss
                 catch (Exception ex)
                 {
 
-                    System.Windows.Forms.MessageBox.Show(ex.Message);
+                    System.Windows.Forms.MessageBox.Show("Грешка при затваряне");
+
                 }
             }
 
