@@ -400,7 +400,7 @@ namespace Miss
 
                 }
             }
-
+            
             //Event of MainPlayer Dying
             private static void MainDying()
             {
