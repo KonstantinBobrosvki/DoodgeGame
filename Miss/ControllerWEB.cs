@@ -98,7 +98,8 @@ namespace Miss
                 string address = "127.0.0.1";
 
                 IPEndPoint ipPoint = new IPEndPoint(IPAddress.Parse(address), port);
-
+            
+                
                 // создаем сокет
                 Socket listenSocket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
                 try
@@ -155,9 +156,11 @@ namespace Miss
 
                             AnotherDied = true;
                         }
-                        else if (builder.ToString().Equals("STOP"))
+                        else if (builder.ToString()==("STOP"))
                         {
                             GameIsStartedonBoth = false;
+                            System.Windows.Forms.MessageBox.Show("Другия играч излезе");
+                            
                         }
 
 
@@ -199,7 +202,7 @@ namespace Miss
                 }
                 catch (Exception e)
                 {
-                    System.Windows.Forms.MessageBox.Show("Connecting have error");
+                    System.Windows.Forms.MessageBox.Show("Грешка при свързване");
                 }
                 GameIsStartedonBoth = true;
             }
@@ -224,7 +227,7 @@ namespace Miss
                 }
                 catch (Exception e)
                 {
-                    System.Windows.Forms.MessageBox.Show(e.StackTrace);
+                    return;
                 }
             }
 
@@ -260,6 +263,10 @@ namespace Miss
             //Sending signal of dying of MainPlayer
             private static void MeDied()
             {
+                if (!GameIsStartedonBoth)
+                    return;
+
+
                 int port = 8006;
                 if (Hoster)
                     port = 8005;
@@ -276,8 +283,9 @@ namespace Miss
                 }
                 catch (Exception e)
                 {
+                    System.Windows.Forms.MessageBox.Show("Грешка при пращане");
 
-                    System.Windows.Forms.MessageBox.Show(e.Message);
+                    return;
                 }
             }
 
@@ -301,7 +309,7 @@ namespace Miss
                 catch (Exception ex)
                 {
 
-                    System.Windows.Forms.MessageBox.Show(ex.Message);
+                    System.Windows.Forms.MessageBox.Show("Грешка при излизане");
                 }
             }
 
