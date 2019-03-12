@@ -73,6 +73,9 @@ namespace Miss
 		}
 		void ConnectClick(object sender, EventArgs e)
 		{
+            if (Controller.Web.EnemyIp == null)
+                return;
+
             if (ColorChoose.SelectedItem != null)
                 Controller.Web.MainPlayer = new Player(Color.FromName(ColorChoose.SelectedItem.ToString()), name.Text);
             else
@@ -86,9 +89,15 @@ namespace Miss
             
             this.Hide();
 		}
-		
-		
-		//For Local game part go to StartFormLocal.cs
-		
-	}
+
+        private void IP_Input_TextChanged(object sender, EventArgs e)
+        {
+            
+            Controller.Web.EnemyIp = IP_Input.Text;
+        }
+
+
+        //For Local game part go to StartFormLocal.cs
+
+    }
 }

@@ -44,6 +44,7 @@ namespace Miss
             this.ColorChoose = new System.Windows.Forms.ComboBox();
             this.Connect = new System.Windows.Forms.Button();
             this.Host = new System.Windows.Forms.Button();
+            this.IP_Input = new System.Windows.Forms.TextBox();
             this.SuspendLayout();
             // 
             // name
@@ -89,11 +90,23 @@ namespace Miss
             this.Host.UseVisualStyleBackColor = true;
             this.Host.Click += new System.EventHandler(this.HostClick);
             // 
+            // IP_Input
+            // 
+            this.IP_Input.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+            this.IP_Input.Font = new System.Drawing.Font("Microsoft Sans Serif", 20.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(204)));
+            this.IP_Input.Location = new System.Drawing.Point(13, 439);
+            this.IP_Input.Name = "IP_Input";
+            this.IP_Input.Size = new System.Drawing.Size(201, 38);
+            this.IP_Input.TabIndex = 4;
+            this.IP_Input.Text = "Your friend IP\r\n\r\n";
+            this.IP_Input.TextChanged += new System.EventHandler(this.IP_Input_TextChanged);
+            // 
             // StartForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(1381, 668);
+            this.Controls.Add(this.IP_Input);
             this.Controls.Add(this.Host);
             this.Controls.Add(this.Connect);
             this.Controls.Add(this.ColorChoose);
@@ -104,5 +117,7 @@ namespace Miss
             this.PerformLayout();
 
 		}
-	}
+
+        private System.Windows.Forms.TextBox IP_Input;
+    }
 }

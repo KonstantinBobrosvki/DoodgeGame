@@ -4,15 +4,14 @@ using System.Net;
 using System.Net.Sockets;
 using System.Text;
 using System.Threading.Tasks;
-using System.Threading;
-
-using System.Runtime.Serialization.Formatters.Binary;
+using System.Security;
+using System.Security.Permissions;
 
 namespace Miss
 {
     public static partial class Controller
     {
-
+      
         public static class Web
         {
             //8006 is hoster recivier 8005 is for client
@@ -63,15 +62,19 @@ namespace Miss
                 }
             }
 
-            public static string MyIPAdress
+            public static string MyIPAdress //My LOCAL IP
             {
                 get
                 {
-                    //Download info from this site
-                    //My public ip
 
-                    var forret = new WebClient().DownloadString("http://icanhazip.com");
-                    return forret.Remove(forret.Length-1,1);
+                    //While i will testing this will return localhost
+                    //string name = Dns.GetHostName();
+
+                    //return Dns.GetHostEntry(name).AddressList[1].ToString();
+
+                    return "127.0.0.1";
+
+                   
                 }
             }
 
@@ -154,10 +157,10 @@ namespace Miss
             private static void Reciever()
             {
 
-                //hoster port is 8006 client 8005
-                TcpListener tcpListener = new TcpListener(IPAddress.Any,MyPort);
+                
+                
 
-               //TODO: Improve External IP
+             
 
                 IPEndPoint ipPoint = new IPEndPoint(IPAddress.Parse(MyIPAdress), MyPort);
 
@@ -211,6 +214,8 @@ namespace Miss
                                 BallAdd.Start();
                                 NewRound();
                                 SendToStart();
+                                AnotherDied = false;
+
                             }
                             else
                             {
@@ -218,6 +223,7 @@ namespace Miss
                                 AnotherDied = false;
                             }
                             GameIsStartedonBoth = true;
+                            System.Windows.Forms.MessageBox.Show("Start");
 
                         }
                         else if (builder.ToString().Contains(","))
@@ -232,6 +238,7 @@ namespace Miss
                         }
                         else if (builder.ToString().Equals("STOP"))
                         {
+                            System.Windows.Forms.MessageBox.Show("Другия играч изилезе");
                             GameIsStartedonBoth = false;
                         }
 
@@ -300,6 +307,7 @@ namespace Miss
                 catch (Exception e)
                 {
                     System.Windows.Forms.MessageBox.Show("Грешка при пращане на топката");
+                    return;
 
                 }
             }
@@ -328,7 +336,7 @@ namespace Miss
                 {
 
                     System.Windows.Forms.MessageBox.Show("Грешка при пращане на играч");
-
+                    return;
                 }
             }
 
@@ -353,7 +361,7 @@ namespace Miss
                 {
 
                     System.Windows.Forms.MessageBox.Show("Грешка при смърт");
-
+                    return;
                 }
             }
 
@@ -378,7 +386,7 @@ namespace Miss
                 {
 
                     System.Windows.Forms.MessageBox.Show("Грешка при затваряне");
-
+                    return;
                 }
             }
 
