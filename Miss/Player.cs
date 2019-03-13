@@ -18,7 +18,6 @@ namespace Miss
 	/// Description of Player.
 	/// </summary>
    public class Player : IDrawer
-
    {
        
 		
@@ -27,11 +26,47 @@ namespace Miss
 		readonly string name;
 	    readonly Pen pen;
         bool alive;
-        public event Action Dying;
-	    
-	    int hightscore;
-	    int currentscore;
-		int speed;
+
+        //EventArgs are not used
+        public event Action<object,EventArgs> Dying;
+
+        int hightscore;
+        int currentscore;
+
+        public int CurrentScore
+        {
+            get
+            {
+                return currentscore;
+            }
+            set
+            {
+                currentscore = value;
+                if(HightScore <= value)
+                {
+                    HightScore = value;
+                }
+
+
+            }
+        }
+        public int HightScore
+        {
+
+            get
+            {
+                return hightscore;
+            }
+
+            private set
+            {
+                hightscore = value;
+            }
+
+        }
+        public string Name { get { return name; } }
+
+        int speed;
 		Key[] controls;
 		/* елемент controls 
          * 0вверх
@@ -131,7 +166,8 @@ namespace Miss
             Point p = new Point(rnd.Next(0, Balls.BoundsForReflect().Item1 - 70), rnd.Next(0, Balls.BoundsForReflect().Item2 - 70));
             element.area = new Rectangle(p, new Size(50, 50));
         
-}
+        }
+            
 	}
 
     public bool Alive
@@ -144,7 +180,7 @@ namespace Miss
             {
                 if (Dying!=null)
                     if(value==false)
-                        Dying();
+                        Dying(this,new EventArgs());
 
                
 
@@ -260,6 +296,17 @@ namespace Miss
                 }
            
     }
+
+        public static void NewScore()
+        {
+            foreach (var item in all)
+            {
+                if (item.Alive)
+                    item.CurrentScore++;
+            }
+        }
+
+        
 
     }
 

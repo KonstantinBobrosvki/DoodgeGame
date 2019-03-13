@@ -53,7 +53,7 @@ namespace Miss
             this.name.Name = "name";
             this.name.Size = new System.Drawing.Size(243, 46);
             this.name.TabIndex = 0;
-            this.name.Text = "Your nickname";
+            this.name.Text = "Твоето име";
             this.name.TextChanged += new System.EventHandler(this.NameTextChanged);
             // 
             // ColorChoose
@@ -63,7 +63,7 @@ namespace Miss
             this.ColorChoose.Name = "ColorChoose";
             this.ColorChoose.Size = new System.Drawing.Size(130, 21);
             this.ColorChoose.TabIndex = 1;
-            this.ColorChoose.Text = "Color";
+            this.ColorChoose.Text = "Твоят цвят";
             // 
             // Connect
             // 
@@ -73,7 +73,7 @@ namespace Miss
             this.Connect.Name = "Connect";
             this.Connect.Size = new System.Drawing.Size(329, 173);
             this.Connect.TabIndex = 2;
-            this.Connect.Text = "Conntect to game";
+            this.Connect.Text = "Свържи се към игра\r\n";
             this.Connect.UseVisualStyleBackColor = true;
             this.Connect.Click += new System.EventHandler(this.ConnectClick);
             // 
@@ -85,7 +85,7 @@ namespace Miss
             this.Host.Name = "Host";
             this.Host.Size = new System.Drawing.Size(329, 173);
             this.Host.TabIndex = 3;
-            this.Host.Text = "Host a game";
+            this.Host.Text = "Стартирай игра\r\n";
             this.Host.UseVisualStyleBackColor = true;
             this.Host.Click += new System.EventHandler(this.HostClick);
             // 

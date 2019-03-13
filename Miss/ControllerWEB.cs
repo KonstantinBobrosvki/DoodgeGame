@@ -15,24 +15,32 @@ namespace Miss
 
         public static class Web
         {
-            //8006 is hoster recivier 8005 is for client
-
-            private static bool GameIsStartedonBoth;
-
             static Player p;
             
             public static bool Hoster;
 
             static bool anotherdied; //Is dead another player
 
-   
+            private static bool gameisstartedonboth;
 
-           
+            public static bool GameIsStartedonBoth { get => gameisstartedonboth; set => gameisstartedonboth = value; }
+
+            static System.Windows.Forms.Label score;
+
+            static System.Windows.Forms.Timer forscore;
 
             //Initialization of some things
             static Web()
             {
                 GameIsStartedonBoth = false;
+
+                score = new System.Windows.Forms.Label();
+                score.Bounds = new System.Drawing.Rectangle(0, 0, 100, 50);
+                score.BackColor = System.Drawing.Color.White;
+
+                forscore = new System.Windows.Forms.Timer();
+                forscore.Tick += (sender, even) => Player.NewScore();
+                forscore.Interval = 1000;
             }
 
             //Initialization of all things 
@@ -41,9 +49,13 @@ namespace Miss
                 //Opening new form for playground
                 MainForm form = new MainForm();
                 SetScreen(form);
-
+                screen.Controls.Add(score);
                 //Showing playground
                 screen.Show();
+
+               
+               
+                forscore.Start();
 
                 Frame.Start();
                 Frame.Tick += ScreenUpdate;
@@ -65,9 +77,13 @@ namespace Miss
                 //Start listening for signals
                 await Task.Run(() => Reciever());
 
+               
                 //For closing of program
+                //I dont known what shit is going on
                 screen.FormClosed += Exit;
-
+                Program.z.FormClosed += Exit;
+                screen.FormClosing += Exit;
+                Program.z.FormClosing += Exit;
 
             }//Like main
 
@@ -156,11 +172,20 @@ namespace Miss
 
                             AnotherDied = true;
                         }
-                        else if (builder.ToString()==("STOP"))
+                        else if (builder.ToString()== "Exit")
                         {
                             GameIsStartedonBoth = false;
                             System.Windows.Forms.MessageBox.Show("Другия играч излезе");
+                            NewRound();
                             
+                        }
+                        else  if(builder.ToString().Contains("Exit") || builder.ToString().Contains("Exit".ToLower()))
+                        {
+                            System.Windows.Forms.MessageBox.Show("Другия играч излезе");
+
+                            GameIsStartedonBoth = false;
+                            NewRound();
+
                         }
 
 
@@ -256,13 +281,14 @@ namespace Miss
                 catch (Exception e)
                 {
 
-                    System.Windows.Forms.MessageBox.Show(e.Message);
+                    return;
                 }
             }
 
             //Sending signal of dying of MainPlayer
             private static void MeDied()
             {
+
                 if (!GameIsStartedonBoth)
                     return;
 
@@ -290,7 +316,18 @@ namespace Miss
             }
 
             //Send signal that i left
-            static void Exit(object caller,System.Windows.Forms.FormClosedEventArgs e)
+             static void Exit(object caller,System.Windows.Forms.FormClosedEventArgs e)
+             {
+                Exit();
+             }
+            //Send signal that i left
+            static void Exit(object caller,System.Windows.Forms.FormClosingEventArgs e)
+            {
+                
+                Exit(); 
+            }
+            //Signal exit Method
+            public static void Exit()
             {
                 int port = 8006;
                 if (Hoster)
@@ -300,8 +337,9 @@ namespace Miss
                 try
                 {
                     sender.Connect(ipPoint);
+                    
 
-                    var forsend = Encoding.Unicode.GetBytes("STOP");
+                    var forsend = Encoding.Unicode.GetBytes("Exit");
                     sender.Send(forsend);
                     sender.Shutdown(SocketShutdown.Both);
                     sender.Close();
@@ -312,7 +350,6 @@ namespace Miss
                     System.Windows.Forms.MessageBox.Show("Грешка при излизане");
                 }
             }
-
             #endregion
 
             //Player of this computer
@@ -332,12 +369,24 @@ namespace Miss
                 }
             }
 
+          
+
             //Event of MainPlayer Dying
-            private static void MainDying()
+            private static void MainDying(object sender,EventArgs e)
             {
+                forscore.Stop();
                 //Send to other comp that i died
-                if(GameIsStartedonBoth)
+
+                if (GameIsStartedonBoth)
                 MeDied();
+
+                
+
+                
+                score.Text = "Твоят най-добър резултат " + MainPlayer.HightScore + " Текущ резултат" + MainPlayer.CurrentScore;
+                MainPlayer.CurrentScore = 0;
+                    
+
             }
 
             //Sending information about your MainPlayer to other computer
@@ -361,6 +410,7 @@ namespace Miss
             //Starting new round
             static void NewRound()
             {
+                forscore.Start();
                 Player.NewRound();
                 AnotherDied = false;
                 Balls.Clear();

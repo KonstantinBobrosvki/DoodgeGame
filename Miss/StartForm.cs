@@ -46,10 +46,11 @@ namespace Miss
 		}
 		void HostClick(object sender, EventArgs e)
 		{
-			DialogResult local=MessageBox.Show("Will this game be local ?","Game type",MessageBoxButtons.YesNo);
+			DialogResult local=MessageBox.Show("Тази игра ще се играе на един компютър ?","Тип игра",MessageBoxButtons.YesNo);
 	if (local==DialogResult.Yes) {
 				LocalClick();
 	}
+
 			else
 			{
                 try
@@ -77,7 +78,7 @@ namespace Miss
                 Controller.Web.MainPlayer = new Player(Color.FromName(ColorChoose.SelectedItem.ToString()), name.Text);
             else
             {
-                MessageBox.Show("Choose Color");
+                MessageBox.Show("Избери цвят");
                 return;
             }
             Controller.Web.Hoster = false;

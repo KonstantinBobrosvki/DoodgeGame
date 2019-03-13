@@ -47,6 +47,7 @@ namespace Miss
           
         }
 
+        
         //set form where we draw
 		public static void SetScreen(Form f)
 		{
@@ -65,9 +66,9 @@ namespace Miss
         //Close all windows of Aplication
         private static void CloseAplication(object sender,EventArgs e)
         {
-            
+            if (Web.MainPlayer != null)
+                Web.Exit();
             Program.z.Close();
-
         }
 
         //Drawing on Form
@@ -84,10 +85,33 @@ namespace Miss
 
         //Call drawing on form
         //It must be called on every tick without event
+        private static bool IsOpenedDialogForExit = true;
 		private static void FrameTick()
 		{
+            if(Keyboard.IsKeyDown(Key.Escape))
+            {
+               
+                if (IsOpenedDialogForExit)
+                {
+                    IsOpenedDialogForExit = false;
+                    DialogResult d = MessageBox.Show("Искате ли да излезете?", "Сигурни ли сте, че искате да излезете?", MessageBoxButtons.YesNo);
+                    if (d == DialogResult.Yes)
+                    {
+                        Program.z.Close();
+                        IsOpenedDialogForExit = true;
+                    }
+                    else
+                    {
+                        IsOpenedDialogForExit = true ;
+                    }
+                }
+            }
              screen.Invalidate();
 		}
+        public static void Clear()
+        {
+            ToDraw.Clear();
+        }
 		
 	   
 		

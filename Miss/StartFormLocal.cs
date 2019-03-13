@@ -20,6 +20,7 @@ namespace Miss
                 NumericUpDown CountOfPlayers = new NumericUpDown();
                 CountOfPlayers.SetBounds(30, 30, 150, 200);
                 CountOfPlayers.Font = new Font("Times New Roman", 24.0f);
+               
                 CountOfPlayers.BorderStyle = BorderStyle.FixedSingle;
                 CountOfPlayers.ValueChanged += PlayerCountChanged;
                 CountOfPlayers.Maximum = 4;
@@ -55,11 +56,11 @@ namespace Miss
                 namefield.Bounds = new Rectangle(new Point(i * 210, Screen.PrimaryScreen.WorkingArea.Height / 2 - 60), new Size(200, 100));
                 namefield.Font = new Font("Times New Roman", 24.0f);
 
-                namefield.Text = "Your name";
+                namefield.Text = "Име на играч";
                 Controls.Add(namefield);
                 #region Color chooser
                 ComboBox color = new ComboBox();
-                color.Text = "Your color";
+                color.Text = "Цветът на играч";
                 //Fill Chosse color for player
                 foreach (System.Reflection.PropertyInfo prop in typeof(Color).GetProperties())
                 {
@@ -75,7 +76,7 @@ namespace Miss
             Button StartGame = new Button();
             StartGame.Click += StartLocalGame;
             StartGame.Bounds = new Rectangle(new Point(Screen.PrimaryScreen.Bounds.Width / 2 - 150, Screen.PrimaryScreen.Bounds.Height - 200), new Size(200, 150));
-            StartGame.Text = "Start";
+            StartGame.Text = "Започни";
             Controls.Add(StartGame);
 
         }
@@ -91,16 +92,25 @@ namespace Miss
             }
             catch (NullReferenceException)
             {
-                MessageBox.Show("Everyone must choose his color");
+                MessageBox.Show("Всеки трябва да си избере цвят и име");
                 Player.Clear();
+                Controller.Clear();
                 return;
             }
+            catch (Exception)
+            {
+                MessageBox.Show("Всеки трябва да си избере цвят и име");
+                Player.Clear();
+                Controller.Clear();
+                return;
+            }
+            this.Hide();
+
             Controller.Local.Start();
             
             
            
            
-            this.Hide();
         }
 
 
