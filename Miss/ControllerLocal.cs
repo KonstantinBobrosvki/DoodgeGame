@@ -60,8 +60,49 @@ namespace Miss
             static Dictionary<String, (int, int)> logs;
             private static void PlayerDying(object sender,EventArgs e)
             {
+                int i = 0;
                 Player p = sender as Player;
-                logs.Add(p.Name, (p.HightScore, p.CurrentScore));
+                try
+                {
+                    logs.Add(p.Name, (p.HightScore, p.CurrentScore));
+                }
+                catch(ArgumentException)
+                {
+                    try
+                    {
+                        logs.Add(p.Name + ++i, (p.HightScore, p.CurrentScore));
+                    }
+                    catch(ArgumentException)
+                    {
+                        try
+                        {
+                            logs.Add(p.Name + ++i, (p.HightScore, p.CurrentScore));
+                        }
+                        catch (ArgumentException)
+                        {
+                            try
+                            {
+                                logs.Add(p.Name + ++i, (p.HightScore, p.CurrentScore));
+                            }
+                            catch (ArgumentException)
+                            {
+                                try
+                                {
+                                    logs.Add(p.Name + ++i, (p.HightScore, p.CurrentScore));
+                                }
+                                catch(ArgumentException)
+                                {
+                                    
+                                        logs.Add(p.Name + ++i, (p.HightScore, p.CurrentScore));
+                                   
+                                }
+
+
+                        }
+                            }
+
+                    }
+                }
                 p.CurrentScore = 0;
             }
 
