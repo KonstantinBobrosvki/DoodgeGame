@@ -26,10 +26,11 @@ namespace Miss
 			InitializeComponent();
 
 
-        
+            this.Icon = new Icon(System.AppDomain.CurrentDomain.BaseDirectory + "favicon.ico");
 
-         this.DoubleBuffered=true;
+            this.DoubleBuffered=true;
 
+            
           this.FormBorderStyle = FormBorderStyle.None;
             WindowState = FormWindowState.Maximized;
 

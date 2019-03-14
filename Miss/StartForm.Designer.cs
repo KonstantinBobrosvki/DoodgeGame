@@ -44,6 +44,7 @@ namespace Miss
             this.ColorChoose = new System.Windows.Forms.ComboBox();
             this.Connect = new System.Windows.Forms.Button();
             this.Host = new System.Windows.Forms.Button();
+            this.Exit = new System.Windows.Forms.Button();
             this.SuspendLayout();
             // 
             // name
@@ -89,20 +90,35 @@ namespace Miss
             this.Host.UseVisualStyleBackColor = true;
             this.Host.Click += new System.EventHandler(this.HostClick);
             // 
+            // Exit
+            // 
+            this.Exit.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.Exit.Location = new System.Drawing.Point(1313, 1);
+            this.Exit.Name = "Exit";
+            this.Exit.Size = new System.Drawing.Size(68, 61);
+            this.Exit.TabIndex = 4;
+            this.Exit.Text = "Изход";
+            this.Exit.UseVisualStyleBackColor = true;
+            this.Exit.Click += new System.EventHandler(this.Exit_Click);
+            // 
             // StartForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(1381, 668);
+            this.Controls.Add(this.Exit);
             this.Controls.Add(this.Host);
             this.Controls.Add(this.Connect);
             this.Controls.Add(this.ColorChoose);
             this.Controls.Add(this.name);
             this.Name = "StartForm";
-            this.Text = "StartForm";
+            this.Text = "Начален прозорец";
+ 
             this.ResumeLayout(false);
             this.PerformLayout();
 
 		}
-	}
+
+        private System.Windows.Forms.Button Exit;
+    }
 }

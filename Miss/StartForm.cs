@@ -27,20 +27,23 @@ namespace Miss
 			// The InitializeComponent() call is required for Windows Forms designer support.
 			//
 			InitializeComponent();
-			
+
+            this.Icon = new Icon(System.AppDomain.CurrentDomain.BaseDirectory + "favicon.ico");
+
 			this.WindowState=FormWindowState.Maximized;
 	
-		this.FormBorderStyle=FormBorderStyle.None;
-	//Fill Chosse color for player
-    foreach (System.Reflection.PropertyInfo prop in typeof(Color).GetProperties())  
-    {     
-         if (prop.PropertyType.FullName == "System.Drawing.Color")  
+		    this.FormBorderStyle=FormBorderStyle.None;
+	        //Fill Chosse color for player
+          foreach (System.Reflection.PropertyInfo prop in typeof(Color).GetProperties())  
+          {     
+           if (prop.PropertyType.FullName == "System.Drawing.Color")  
                  ColorChoose.Items.Add(prop.Name);  
-    }  
+          }
 
-		}
-		
-		void NameTextChanged(object sender, EventArgs e)
+            
+        }
+
+        void NameTextChanged(object sender, EventArgs e)
 		{
 	
 		}
@@ -48,7 +51,8 @@ namespace Miss
 		{
 			DialogResult local=MessageBox.Show("Тази игра ще се играе на един компютър ?","Тип игра",MessageBoxButtons.YesNo);
 	if (local==DialogResult.Yes) {
-				LocalClick();
+                new StartFormLocal().Show();
+                this.Hide();
 	}
 
 			else
@@ -87,9 +91,30 @@ namespace Miss
             
             this.Hide();
 		}
-		
-		
-		//For Local game part go to StartFormLocal.cs
-		
-	}
+
+     
+        private bool IsOpenedDialogForExit = true;
+
+        private void Exit_Click(object sender, EventArgs e)
+        {
+            if (IsOpenedDialogForExit)
+            {
+                IsOpenedDialogForExit = false;
+                DialogResult d = MessageBox.Show("Искате ли да излезете?", "Сигурни ли сте, че искате да излезете?", MessageBoxButtons.YesNo);
+                if (d == DialogResult.Yes)
+                {
+                    Program.z.Close();
+                    IsOpenedDialogForExit = true;
+                }
+                else
+                {
+                    IsOpenedDialogForExit = true;
+                }
+            }
+        }
+
+
+        //For Local game part go to StartFormLocal.cs
+
+    }
 }

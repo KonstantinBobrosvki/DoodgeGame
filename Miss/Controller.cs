@@ -83,12 +83,16 @@ namespace Miss
             }
         }
 
+       
+        
+        private static bool IsOpenedDialogForExit = true;
+
         //Call drawing on form
         //It must be called on every tick without event
-        private static bool IsOpenedDialogForExit = true;
-		private static void FrameTick()
+        private static void FrameTick()
 		{
-            if(Keyboard.IsKeyDown(Key.Escape))
+            #region Check for esc for aplication
+            if (Keyboard.IsKeyDown(Key.Escape))
             {
                
                 if (IsOpenedDialogForExit)
@@ -106,7 +110,8 @@ namespace Miss
                     }
                 }
             }
-             screen.Invalidate();
+            #endregion
+            screen.Invalidate();
 		}
         public static void Clear()
         {
